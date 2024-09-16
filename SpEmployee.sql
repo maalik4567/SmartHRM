@@ -2,6 +2,8 @@ create database HRSystem;
 
 use HRSystem
 
+DROP Table Employees
+
 CREATE TABLE SignIn (
     Id INT PRIMARY KEY IDENTITY(1,1),  -- Auto-incrementing ID column
     UserName NVARCHAR(100) NOT NULL,       -- Name column with a max length of 100 characters
@@ -9,36 +11,7 @@ CREATE TABLE SignIn (
 );
 
 insert into signin values('malik45','m123');
-
-select * from SignIn
-
-
-CREATE PROCEDURE ValidateUser
-    @UserName NVARCHAR(100),
-    @Password NVARCHAR(100)
-AS
-BEGIN
-    -- Select the user record that matches the provided username and password
-    SELECT * 
-    FROM SignIn 
-    WHERE UserName = @UserName AND Password = @Password;
-END;
-
-EXEC ValidateUser @UserName = 'malik45', @Password = 'm123';
-
-
--- Check if the stored procedure exists
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'ValidateUser')
-BEGIN
-    PRINT 'Stored Procedure exists.';
-END
-ELSE
-BEGIN
-    PRINT 'Stored Procedure does not exist.';
-END
-
-
-
+select * from signin;
 
 CREATE TABLE Employees (
     EmpId INT IDENTITY(1,1) PRIMARY KEY,
@@ -78,9 +51,7 @@ VALUES
 
 ('Sara Qureshi', 'sara.qureshi@example.com', 'Training', 'Training Coordinator', '2021-06-14', '1996-02-20', 'Full-Time', 'Female', 70000.00, '12345678901234', '03901234567');
 
-
-
-
+---------Employee SPS--------------
 CREATE PROCEDURE GetAllEmployees
 AS
 BEGIN
@@ -122,6 +93,7 @@ BEGIN
     WHERE EmpId = @EmpId;
 END;
 
+DROP PROCEDURE InsertEmployee;
 
 ---------------NEW TBS-----------
 -- Create Department Table
@@ -142,6 +114,7 @@ CREATE TABLE EmployeeType (
     Type NVARCHAR(100) NOT NULL
 );
 
+
 -- Insert Sample Data into Department Table
 INSERT INTO Department (Name) VALUES ('Human Resources');
 INSERT INTO Department (Name) VALUES ('Information Technology');
@@ -160,13 +133,96 @@ INSERT INTO EmployeeType (Type) VALUES ('Part-Time');
 INSERT INTO EmployeeType (Type) VALUES ('Contract');
 INSERT INTO EmployeeType (Type) VALUES ('Intern');
 
-select * from Employees;
 
-DROP PROCEDURE InsertEmployee;
 
 
 
 -- ALL SPS ETC
+CREATE PROCEDURE UpdateEmployee
+    @EmpId INT,
+    @FullName NVARCHAR(100),
+    @Email NVARCHAR(100),
+    @Department INT,
+    @Position INT,
+    @HireDate DATE,
+    @DateOfBirth DATE,
+    @EmployeeType INT,
+    @Gender NVARCHAR(10),
+    @Salary DECIMAL(18, 2),
+    @CNIC NVARCHAR(20),
+    @PhoneNumber NVARCHAR(20)
+AS
+BEGIN
+    UPDATE Employees
+    SET 
+        FullName = @FullName,
+        Email = @Email,
+        Department = @Department,
+        Position = @Position,
+        HireDate = @HireDate,
+        DateOfBirth = @DateOfBirth,
+        EmployeeType = @EmployeeType,
+        Gender = @Gender,
+        Salary = @Salary,
+        CNIC = @CNIC,
+        PhoneNumber = @PhoneNumber
+    WHERE EmpId = @EmpId;
+END;
 
 
+
+CREATE PROCEDURE GetAllEmployees    
+AS    
+BEGIN    
+    SELECT e.EmpId,e.FullName,e.Email,p.Title,D.Name,e.Gender,ET.Type from Employees e  
+INNER JOIN Position p on p.Id = e.Position  
+INNER JOIN Department D on D.Id = e.Department    
+INNER JOIN EmployeeType ET on ET.Id = e.EmployeeType  
+END;
+
+
+CREATE PROCEDURE GetEmployeeById
+    @EmpId INT
+AS
+BEGIN
+
+
+    -- Retrieve the employee details by EmpId
+    -- Revised stored procedure to retrieve employee details by EmpId
+ALTER PROCEDURE GetEmployeeById
+    @EmpId INT
+AS
+BEGIN
+    -- Retrieve the employee details by EmpId
+    SELECT 
+        e.EmpId,
+        e.FullName,
+        e.Email,
+        e.HireDate,
+        e.DateOfBirth,
+        e.Gender,
+        e.Salary,
+        e.CNIC,
+        e.PhoneNumber,
+        p.Title,
+        D.Name,
+        ET.Type
+    FROM Employees e
+    INNER JOIN Position p ON p.Id = e.Position
+    INNER JOIN Department D ON D.Id = e.Department
+    INNER JOIN EmployeeType ET ON ET.Id = e.EmployeeType
+    WHERE e.EmpId = @EmpId;
+END;
+
+EXEC GetEmployeeById @EmpId = 1; -- Replace 1 with a valid employee ID
+
+
+CREATE PROCEDURE DeleteEmployeeById
+    @EmployeeId INT
+AS
+BEGIN
+    -- Delete the employee record with the specified ID
+    DELETE FROM Employees
+    WHERE EmpId = @EmployeeId;
+END;
 
