@@ -1,1 +1,2 @@
-# SmartHRM
+# SmartHRM 
+Smart HR Management System
